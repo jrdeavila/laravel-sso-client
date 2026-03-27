@@ -11,7 +11,7 @@ return [
     'token_ttl' => env('SSO_TOKEN_TTL', 60),
 
     // Ruta destino en la receptora tras login exitoso
-    'redirect_after_login' => env('SSO_REDIRECT_AFTER_LOGIN', '/dashboard'),
+    'redirect_after_login' => env('SSO_REDIRECT_AFTER_LOGIN', '/'),
 
     // Nombre del query param que trae el token — debe coincidir con el lanzador
     'token_param' => env('SSO_TOKEN_PARAM', 'token'),
