@@ -41,6 +41,7 @@ Las variables `SSO_TOKEN_PARAM` (default: `token`) y `SSO_USER_ID_FIELD` (defaul
 ## Lo que el paquete registra automáticamente
 
 - **Ruta** `GET /sso/callback` (named `sso.callback`)
+- **Ruta** `POST /sso/verify-secret` (named `sso.verify-secret`) — usada por el lanzador para confirmar configuración
 - **Middleware alias** `sso.token` → `ValidateSsoToken`
 - **Config** `sso.*` (publicable con tag `sso-config`)
 - No hay migraciones — la base de datos de usuarios ya es compartida entre el lanzador y las receptoras
