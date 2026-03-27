@@ -1,0 +1,23 @@
+{
+    "name": "ccv/laravel-sso-client",
+    "description": "SSO client package for Laravel receiver applications (CCV)",
+    "type": "library",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^11.0|^12.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "CCV\\SsoClient\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "CCV\\SsoClient\\SsoClientServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable"
+}

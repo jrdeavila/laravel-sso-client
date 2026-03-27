@@ -1,0 +1,17 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  notify-packagist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Private Packagist
+        run: |
+          curl -s -XPOST \
+            -H "Content-Type: application/json" \
+            -d "{\"repository\":{\"url\":\"${{ github.server_url }}/${{ github.repository }}\"}}" \
+            "${{ secrets.PACKAGIST_WEBHOOK_URL }}"
