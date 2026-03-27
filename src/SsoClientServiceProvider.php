@@ -1,11 +1,11 @@
 <?php
 
-namespace CCV\SsoClient;
+namespace CamaradeComercioDeValledupar\SsoClient;
 
 use Illuminate\Support\ServiceProvider;
-use CCV\SsoClient\Crypto\SsoSigner;
-use CCV\SsoClient\Http\Middleware\ValidateSsoToken;
-use CCV\SsoClient\Services\SsoTokenService;
+use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
+use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\ValidateSsoToken;
+use CamaradeComercioDeValledupar\SsoClient\Services\SsoTokenService;
 
 class SsoClientServiceProvider extends ServiceProvider
 {

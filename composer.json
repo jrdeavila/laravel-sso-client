@@ -1,6 +1,6 @@
 {
-    "name": "ccv/laravel-sso-client",
-    "description": "SSO client package for Laravel receiver applications (CCV)",
+    "name": "camara-de-comercio-de-valledupar/laravel-sso-client",
+    "description": "SSO client package for Laravel receiver applications (Cámara de Comercio de Valledupar)",
     "type": "library",
     "license": "proprietary",
     "require": {
@@ -9,13 +9,13 @@
     },
     "autoload": {
         "psr-4": {
-            "CCV\\SsoClient\\": "src/"
+            "CamaradeComercioDeValledupar\\SsoClient\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "CCV\\SsoClient\\SsoClientServiceProvider"
+                "CamaradeComercioDeValledupar\\SsoClient\\SsoClientServiceProvider"
             ]
         }
     },

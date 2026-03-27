@@ -1,12 +1,12 @@
 <?php
 
-namespace CCV\SsoClient\Http\Controllers;
+namespace CamaradeComercioDeValledupar\SsoClient\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use CCV\SsoClient\Services\SsoTokenService;
+use CamaradeComercioDeValledupar\SsoClient\Services\SsoTokenService;
 
 class SsoController extends Controller
 {

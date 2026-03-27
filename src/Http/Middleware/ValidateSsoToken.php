@@ -1,10 +1,10 @@
 <?php
 
-namespace CCV\SsoClient\Http\Middleware;
+namespace CamaradeComercioDeValledupar\SsoClient\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use CCV\SsoClient\Services\SsoTokenService;
+use CamaradeComercioDeValledupar\SsoClient\Services\SsoTokenService;
 
 class ValidateSsoToken
 {

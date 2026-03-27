@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use CCV\SsoClient\Http\Controllers\SsoController;
+use CamaradeComercioDeValledupar\SsoClient\Http\Controllers\SsoController;
 
 Route::middleware(['web', 'sso.token'])
     ->prefix('sso')

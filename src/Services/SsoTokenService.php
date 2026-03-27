@@ -1,8 +1,8 @@
 <?php
 
-namespace CCV\SsoClient\Services;
+namespace CamaradeComercioDeValledupar\SsoClient\Services;
 
-use CCV\SsoClient\Crypto\SsoSigner;
+use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
 
 class SsoTokenService
 {

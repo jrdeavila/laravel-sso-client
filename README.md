@@ -1,6 +1,6 @@
-# ccv/laravel-sso-client
+# camara-de-comercio-de-valledupar/laravel-sso-client
 
-SSO client package for Laravel receiver applications in the CCV ecosystem.
+SSO client package for Laravel receiver applications for Cámara de Comercio de Valledupar.
 
 ---
 
@@ -8,14 +8,14 @@ SSO client package for Laravel receiver applications in the CCV ecosystem.
 
 - PHP 8.2+
 - Laravel 11 o Laravel 12
-- Acceso a la base de datos compartida de usuarios CCV (conexión configurada en la receptora)
+- Acceso a la base de datos compartida de usuarios de Cámara de Comercio de Valledupar (conexión configurada en la receptora)
 
 ---
 
 ## Instalación
 
 ```bash
-composer require ccv/laravel-sso-client
+composer require camara-de-comercio-de-valledupar/laravel-sso-client
 
 # Opcional — publicar config para sobrescribir valores por defecto:
 php artisan vendor:publish --tag=sso-config
@@ -29,7 +29,7 @@ El Service Provider se registra automáticamente vía package auto-discovery.
 
 | Variable | Descripción | Ejemplo |
 |---|---|---|
-| `SSO_SECRET` | Secret compartido con el lanzador | (coordinarlo con CCV) |
+| `SSO_SECRET` | Secret compartido con el lanzador | (coordinarlo con el administrador del lanzador) |
 | `SSO_LAUNCHER_URL` | URL base del lanzador | `https://lanzador.ccvalledupar.org.co` |
 | `SSO_TOKEN_TTL` | TTL del token en segundos | `60` |
 | `SSO_REDIRECT_AFTER_LOGIN` | Ruta destino tras login exitoso | `/dashboard` |

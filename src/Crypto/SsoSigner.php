@@ -1,12 +1,12 @@
 <?php
 
-namespace CCV\SsoClient\Crypto;
+namespace CamaradeComercioDeValledupar\SsoClient\Crypto;
 
 /**
  * Formato: base64(json(payload)).hmac_sha256(base64(json(payload)), secret)
  * Son DOS partes separadas por punto — no el JWT estándar de tres partes.
  *
- * Portado de App\Services\SsoTokenService — ccv/laravel-sso-client v1.0.0
+ * Portado de App\Services\SsoTokenService — camara-de-comercio-de-valledupar/laravel-sso-client v1.0.0
  *
  * IMPORTANTE: encode() y decode() deben mantenerse sincronizados con
  * el lanzador. Cualquier cambio debe coordinarse y versionarse.
