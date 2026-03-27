@@ -25,6 +25,7 @@ class SsoClientServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadRoutesFrom(__DIR__ . '/../routes/sso.php');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'sso-client');
 
         $this->app['router']->aliasMiddleware('sso.token', ValidateSsoToken::class);
 

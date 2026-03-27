@@ -4,6 +4,7 @@ namespace CamaradeComercioDeValledupar\SsoClient\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use CamaradeComercioDeValledupar\SsoClient\Services\SsoTokenService;
@@ -37,5 +38,16 @@ class SsoController extends Controller
         Auth::login($user);
 
         return redirect(config('sso.redirect_after_login'));
+    }
+
+    public function logout(Request $request): Response
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->view('sso-client::logout', [
+            'launcher_url' => rtrim(config('sso.launcher_url'), '/'),
+        ]);
     }
 }
