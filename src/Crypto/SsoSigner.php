@@ -14,7 +14,7 @@ namespace CamaradeComercioDeValledupar\SsoClient\Crypto;
  */
 class SsoSigner
 {
-    public function __construct(private readonly string $secret) {}
+    public function __construct(private readonly ?string $secret) {}
 
     /**
      * Construye el token.
@@ -24,6 +24,10 @@ class SsoSigner
      */
     public function encode(array $payload): string
     {
+        if ($this->secret === null) {
+            throw new \RuntimeException('SSO_SECRET no está configurado.');
+        }
+
         $payloadEncoded = base64_encode(json_encode($payload));
         $signature      = hash_hmac('sha256', $payloadEncoded, $this->secret);
 
@@ -43,6 +47,10 @@ class SsoSigner
 
         if (count($parts) !== 2) {
             throw new \RuntimeException('Token malformado.');
+        }
+
+        if ($this->secret === null) {
+            throw new \RuntimeException('SSO_SECRET no está configurado.');
         }
 
         [$payloadEncoded, $signature] = $parts;
