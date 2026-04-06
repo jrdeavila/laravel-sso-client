@@ -30,20 +30,46 @@
         (function () {
             var launcherUrl = @json($launcher_url);
 
-            // Si la pestaña fue abierta desde el lanzador (window.opener existe y no está cerrado),
-            // cerrar esta pestaña y enfocar el lanzador.
+            // Método 1: esta pestaña fue abierta directamente desde el launcher (window.opener).
             if (window.opener && !window.opener.closed) {
                 try {
-                    window.opener.location.href = launcherUrl;
                     window.opener.focus();
                     window.close();
                     return;
                 } catch (e) {
-                    // Error cross-origin — caer al redirect directo
+                    // Error cross-origin — continuar con método 2
                 }
             }
 
-            // Sin opener: redirigir en la misma pestaña al lanzador.
+            // Método 2: buscar cualquier pestaña del launcher por window.name = 'sso-launcher'.
+            // window.open('', nombre) devuelve la pestaña existente con ese nombre sin abrir una nueva;
+            // si no existe ninguna, abre una en blanco (que cerramos de inmediato).
+            var launcherWin = null;
+            try {
+                launcherWin = window.open('', 'sso-launcher');
+            } catch (e) { /* bloqueado por el navegador */ }
+
+            if (launcherWin && launcherWin !== window && !launcherWin.closed) {
+                var launcherIsOpen = false;
+                try {
+                    // Mismo origen: podemos leer href directamente
+                    launcherIsOpen = launcherWin.location.href !== 'about:blank';
+                } catch (crossOriginError) {
+                    // Error cross-origin significa que es una página real → el launcher está abierto
+                    launcherIsOpen = true;
+                }
+
+                if (launcherIsOpen) {
+                    launcherWin.focus();
+                    window.close();
+                    return;
+                } else {
+                    // Era una ventana en blanco generada por window.open — cerrarla
+                    launcherWin.close();
+                }
+            }
+
+            // Sin launcher abierto: redirigir en esta misma pestaña.
             window.location.href = launcherUrl;
         })();
     </script>
