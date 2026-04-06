@@ -4,13 +4,22 @@ namespace CamaradeComercioDeValledupar\SsoClient\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 
 class SsoAuthenticate
 {
+    // Rutas accesibles sin autenticación (rutas propias del paquete SSO)
+    private array $except = ['sso/*'];
+
     public function handle(Request $request, Closure $next): mixed
     {
+        // Dejar pasar rutas excluidas
+        foreach ($this->except as $pattern) {
+            if ($request->is($pattern)) {
+                return $next($request);
+            }
+        }
+
         if (Auth::check()) {
             return $next($request);
         }
