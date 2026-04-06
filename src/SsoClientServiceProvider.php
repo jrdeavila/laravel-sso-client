@@ -4,6 +4,7 @@ namespace CamaradeComercioDeValledupar\SsoClient;
 
 use Illuminate\Support\ServiceProvider;
 use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
+use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\SsoAuthenticate;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\ValidateSsoToken;
 use CamaradeComercioDeValledupar\SsoClient\Services\SsoTokenService;
 
@@ -28,6 +29,7 @@ class SsoClientServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'sso-client');
 
         $this->app['router']->aliasMiddleware('sso.token', ValidateSsoToken::class);
+        $this->app['router']->aliasMiddleware('sso.auth', SsoAuthenticate::class);
 
         $this->publishes([
             __DIR__ . '/../config/sso.php' => config_path('sso.php'),
