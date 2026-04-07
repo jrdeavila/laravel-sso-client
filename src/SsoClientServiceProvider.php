@@ -2,17 +2,18 @@
 
 namespace CamaradeComercioDeValledupar\SsoClient;
 
-use Illuminate\Support\ServiceProvider;
 use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\SsoAuthenticate;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\ValidateSsoToken;
 use CamaradeComercioDeValledupar\SsoClient\Services\SsoTokenService;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class SsoClientServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/sso.php', 'sso');
+        $this->mergeConfigFrom(__DIR__.'/../config/sso.php', 'sso');
 
         $this->app->singleton(SsoSigner::class, fn () => new SsoSigner(
             config('sso.secret')
@@ -27,8 +28,9 @@ class SsoClientServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadRoutesFrom(__DIR__ . '/../routes/sso.php');
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'sso-client');
+        $this->loadRoutesFrom(__DIR__.'/../routes/sso.php');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'sso-client');
+        View::addNamespace('ccv', __DIR__.'/../resources/views');
 
         $this->app['router']->aliasMiddleware('sso.token', ValidateSsoToken::class);
         $this->app['router']->aliasMiddleware('sso.auth', SsoAuthenticate::class);
@@ -38,17 +40,20 @@ class SsoClientServiceProvider extends ServiceProvider
         $this->app['router']->pushMiddlewareToGroup('web', SsoAuthenticate::class);
 
         $this->publishes([
-            __DIR__ . '/../config/sso.php' => config_path('sso.php'),
+            __DIR__.'/../config/sso.php' => config_path('sso.php'),
         ], 'sso-config');
 
         $this->publishes([
-            __DIR__ . '/../config/widgets.php' => config_path('widgets.php'),
+            __DIR__.'/../config/widgets.php' => config_path('widgets.php'),
         ], 'ccv-widgets-config');
 
         $this->publishes([
-            __DIR__ . '/../resources/views/widgets'
-                => resource_path('views/vendor/ccv/widgets'),
+            __DIR__.'/../resources/views/widgets' => resource_path('views/vendor/ccv/widgets'),
         ], 'ccv-widgets-views');
+
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/ccv'),
+        ], 'ccv-views');
 
         $this->bootWidgetFeature();
     }
@@ -60,7 +65,7 @@ class SsoClientServiceProvider extends ServiceProvider
     protected function registerWidgetFeature(): void
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/widgets.php',
+            __DIR__.'/../config/widgets.php',
             'widgets'
         );
     }
@@ -72,11 +77,11 @@ class SsoClientServiceProvider extends ServiceProvider
      */
     protected function bootWidgetFeature(): void
     {
-        if (!file_exists(config_path('widgets.php'))) {
+        if (! file_exists(config_path('widgets.php'))) {
             return;
         }
 
-        $this->loadRoutesFrom(__DIR__ . '/../routes/widgets.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/widgets.php');
 
         // El namespace 'sso-client' apunta a resources/views/ del paquete.
         // Las vistas SSO están en sso-client::sso.X
