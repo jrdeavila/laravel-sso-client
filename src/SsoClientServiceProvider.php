@@ -21,6 +21,8 @@ class SsoClientServiceProvider extends ServiceProvider
         $this->app->singleton(SsoTokenService::class, fn ($app) => new SsoTokenService(
             $app->make(SsoSigner::class)
         ));
+
+        $this->registerWidgetFeature();
     }
 
     public function boot(): void
@@ -38,5 +40,47 @@ class SsoClientServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/sso.php' => config_path('sso.php'),
         ], 'sso-config');
+
+        $this->publishes([
+            __DIR__ . '/../config/widgets.php' => config_path('widgets.php'),
+        ], 'ccv-widgets-config');
+
+        $this->publishes([
+            __DIR__ . '/../resources/views/widgets'
+                => resource_path('views/vendor/ccv/widgets'),
+        ], 'ccv-widgets-views');
+
+        $this->bootWidgetFeature();
+    }
+
+    /**
+     * Registra la config de widgets. mergeConfigFrom es seguro aunque
+     * el archivo no exista en la app — config('widgets') quedará en null.
+     */
+    protected function registerWidgetFeature(): void
+    {
+        $this->mergeConfigFrom(
+            __DIR__ . '/../config/widgets.php',
+            'widgets'
+        );
+    }
+
+    /**
+     * Activa rutas y vistas de widgets SOLO si la app publicó widgets.php.
+     * Si el archivo no existe, esta feature no se activa — opt-in limpio.
+     * Reutiliza el namespace 'sso-client' ya registrado por el SSO para las vistas.
+     */
+    protected function bootWidgetFeature(): void
+    {
+        if (!file_exists(config_path('widgets.php'))) {
+            return;
+        }
+
+        $this->loadRoutesFrom(__DIR__ . '/../routes/widgets.php');
+
+        // El namespace 'sso-client' apunta a resources/views/ del paquete.
+        // Las vistas SSO están en sso-client::sso.X
+        // Las vistas de widgets están en sso-client::widgets.X
+        // Mismo namespace, subdirectorios distintos — sin conflicto.
     }
 }
