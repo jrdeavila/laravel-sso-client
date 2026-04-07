@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Auth;
 
 class SsoAuthenticate
 {
-    // Rutas accesibles sin autenticación (rutas propias del paquete SSO)
-    private array $except = ['sso/*'];
+    // Rutas accesibles sin autenticación (rutas propias del paquete SSO y widgets)
+    // Los endpoints de widgets usan sso.token (ValidateSsoToken) como seguridad.
+    private array $except = ['sso/*', 'widgets/*'];
 
     public function handle(Request $request, Closure $next): mixed
     {
