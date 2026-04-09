@@ -5,6 +5,7 @@ namespace CamaradeComercioDeValledupar\SsoClient;
 use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\SsoAuthenticate;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\ValidateSsoToken;
+use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\WidgetSessionMiddleware;
 use CamaradeComercioDeValledupar\SsoClient\Services\SsoTokenService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -34,6 +35,7 @@ class SsoClientServiceProvider extends ServiceProvider
 
         $this->app['router']->aliasMiddleware('sso.token', ValidateSsoToken::class);
         $this->app['router']->aliasMiddleware('sso.auth', SsoAuthenticate::class);
+        $this->app['router']->aliasMiddleware('sso.widget_session', WidgetSessionMiddleware::class);
 
         // Inyectar SsoAuthenticate en el grupo 'web' para que todas las rutas
         // de la receptora redirijan al launcher cuando no hay sesión activa.
