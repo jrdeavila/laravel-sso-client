@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use CamaradeComercioDeValledupar\SsoClient\Http\Controllers\WidgetController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,7 +17,7 @@ use CamaradeComercioDeValledupar\SsoClient\Http\Controllers\WidgetController;
 | no capture la palabra "manifest" como slug.
 */
 
-Route::middleware(['web', 'sso.token'])
+Route::middleware(['web', 'sso.token', 'sso.widget_session'])
     ->prefix('widgets')
     ->name('ccv.widgets.')
     ->group(function () {
