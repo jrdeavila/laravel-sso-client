@@ -21,4 +21,9 @@ return [
 
     // Modelo Eloquent del usuario en la receptora
     'user_model' => env('SSO_USER_MODEL', 'App\\Models\\User'),
+
+    // Marcar true cuando este paquete está instalado EN EL PROPIO LANZADOR.
+    // Evita que SsoAuthenticate se inyecte al grupo 'web', lo que causaría un
+    // bucle infinito al redirigir usuarios no autenticados de vuelta a sí mismo.
+    'is_launcher' => env('SSO_IS_LAUNCHER', false),
 ];

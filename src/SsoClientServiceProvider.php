@@ -37,9 +37,12 @@ class SsoClientServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('sso.auth', SsoAuthenticate::class);
         $this->app['router']->aliasMiddleware('sso.widget_session', WidgetSessionMiddleware::class);
 
-        // Inyectar SsoAuthenticate en el grupo 'web' para que todas las rutas
-        // de la receptora redirijan al launcher cuando no hay sesión activa.
-        $this->app['router']->pushMiddlewareToGroup('web', SsoAuthenticate::class);
+        // Inyectar SsoAuthenticate en el grupo 'web' SOLO en apps receptoras.
+        // Si is_launcher=true el paquete está instalado en el propio lanzador:
+        // no se inyecta para evitar el bucle infinito de redirección.
+        if (! config('sso.is_launcher', false)) {
+            $this->app['router']->pushMiddlewareToGroup('web', SsoAuthenticate::class);
+        }
 
         $this->publishes([
             __DIR__.'/../config/sso.php' => config_path('sso.php'),
