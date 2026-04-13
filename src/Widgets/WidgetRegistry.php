@@ -34,15 +34,17 @@ class WidgetRegistry
 
     /**
      * Manifiesto público para el lanzador.
-     * Solo expone slug, name y type — nunca rutas internas ni config sensible.
+     * Expone slug, name, type y has_check.
+     * Nunca rutas internas ni config sensible (check_class no se expone).
      */
     public static function manifest(): array
     {
         return collect(static::all())
             ->map(fn($widget, $slug) => [
-                'slug' => $slug,
-                'name' => $widget['name'],
-                'type' => $widget['type'],
+                'slug'      => $slug,
+                'name'      => $widget['name'],
+                'type'      => $widget['type'],
+                'has_check' => ! empty($widget['check_class']),
             ])
             ->values()
             ->toArray();

@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Route;
 |
 | Protegidas por el middleware sso.token (ValidateSsoToken) — el mismo de /sso/callback.
 |
-| GET /widgets/manifest?token=  → lista widgets disponibles (para el lanzador)
-| GET /widgets/{slug}?token=    → renderiza el widget en iframe
+| GET /widgets/manifest?token=       → lista widgets disponibles (para el lanzador)
+| GET /widgets/{slug}/check?token=   → check server-to-server para announcements
+| GET /widgets/{slug}?token=         → renderiza el widget en iframe
 |
-| NOTA: 'manifest' debe ir ANTES de '{slug}' para que el segmento dinámico
-| no capture la palabra "manifest" como slug.
+| NOTA: las rutas estáticas ('manifest') y las sub-rutas ('/{slug}/check') deben ir
+| ANTES del segmento dinámico '/{slug}' para evitar capturas incorrectas.
 */
 
 Route::middleware(['web', 'sso.token', 'sso.widget_session'])
@@ -24,6 +25,9 @@ Route::middleware(['web', 'sso.token', 'sso.widget_session'])
 
         Route::get('/manifest', [WidgetController::class, 'manifest'])
             ->name('manifest');
+
+        Route::get('/{slug}/check', [WidgetController::class, 'check'])
+            ->name('check');
 
         Route::get('/{slug}', [WidgetController::class, 'show'])
             ->name('show');

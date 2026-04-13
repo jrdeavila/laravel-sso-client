@@ -8,9 +8,16 @@
     <link rel="stylesheet" href="{{ asset('vendor/adminlte/css/adminlte.min.css') }}">
     @stack('styles')
 </head>
-<body style="margin:0; padding:0; background:transparent; overflow:hidden;">
+{{--
+    pointer-events:none en body: el iframe del chatbot ocupa una esquina fija de 420×640 px
+    en el lanzador para no bloquear la UI. Con pointer-events:none en el fondo, solo los
+    elementos dentro de #ccv-widget-root (que lo sobreescribe a 'all') capturan eventos.
+    Para tipos modal (survey, notification, announcement) el lanzador los muestra a pantalla
+    completa, por lo que no se requiere este truco, pero tampoco hace daño.
+--}}
+<body style="margin:0; padding:0; background:transparent; overflow:hidden; pointer-events:none;">
 
-<div id="ccv-widget-root">
+<div id="ccv-widget-root" style="pointer-events:all;">
     @yield('widget-content')
 </div>
 
