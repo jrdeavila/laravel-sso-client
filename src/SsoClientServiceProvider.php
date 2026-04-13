@@ -2,6 +2,7 @@
 
 namespace CamaradeComercioDeValledupar\SsoClient;
 
+use CamaradeComercioDeValledupar\SsoClient\Console\Commands\MakeWidgetCommand;
 use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\SsoAuthenticate;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\ValidateSsoToken;
@@ -61,6 +62,10 @@ class SsoClientServiceProvider extends ServiceProvider
         ], 'ccv-views');
 
         $this->bootWidgetFeature();
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([MakeWidgetCommand::class]);
+        }
     }
 
     /**
