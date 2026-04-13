@@ -13,7 +13,9 @@ class WidgetSessionMiddleware
 
     public function handle(Request $request, Closure $next): mixed
     {
-        $token = $request->query('sso_token');
+        // Usa el mismo parámetro que ValidateSsoToken — por defecto 'token'.
+        // El nombre configurable evita que ambos middlewares lean params distintos.
+        $token = $request->query(config('sso.token_param', 'token'));
 
         if ($token && $this->ssoToken->isValid($token)) {
             $payload = $this->ssoToken->decode($token);
