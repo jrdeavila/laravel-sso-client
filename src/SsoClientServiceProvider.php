@@ -2,6 +2,7 @@
 
 namespace CamaradeComercioDeValledupar\SsoClient;
 
+use CamaradeComercioDeValledupar\SsoClient\Console\Commands\DeleteWidgetCommand;
 use CamaradeComercioDeValledupar\SsoClient\Console\Commands\MakeWidgetCommand;
 use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\SsoAuthenticate;
@@ -64,7 +65,10 @@ class SsoClientServiceProvider extends ServiceProvider
         $this->bootWidgetFeature();
 
         if ($this->app->runningInConsole()) {
-            $this->commands([MakeWidgetCommand::class]);
+            $this->commands([
+                MakeWidgetCommand::class,
+                DeleteWidgetCommand::class,
+            ]);
         }
     }
 
