@@ -93,20 +93,47 @@ class DeleteWidgetCommand extends Command
             return;
         }
 
-        // Elimina el bloque completo del widget: desde la línea con el slug
-        // hasta el cierre de su array ], inclusive la línea en blanco anterior.
-        $updated = preg_replace(
-            "/\n\s*'{$slug}'\s*=>\s*\[.*?\],/s",
-            '',
-            $content,
-            1
-        );
+        // Localiza el inicio de la entrada del widget.
+        $marker = "'{$slug}'";
+        $markerPos = strpos($content, $marker);
 
-        if ($updated === null || $updated === $content) {
-            $this->error("  No se pudo modificar config/widgets.php automáticamente.");
+        if ($markerPos === false) {
+            $this->error("  No se pudo encontrar '{$slug}' en config/widgets.php.");
             $this->line("  Elimina manualmente la entrada <comment>'{$slug}'</comment> del array 'widgets'.");
             return;
         }
+
+        // Retrocede hasta el inicio de la línea (incluyendo línea en blanco previa si existe).
+        $lineStart = strrpos(substr($content, 0, $markerPos), "\n") ?: 0;
+        $prevNewline = strrpos(substr($content, 0, $lineStart), "\n");
+        if ($prevNewline !== false && trim(substr($content, $prevNewline + 1, $lineStart - $prevNewline - 1)) === '') {
+            $lineStart = $prevNewline;
+        }
+
+        // Encuentra el [ que abre el array del widget y cuenta brackets para
+        // llegar al ] de cierre — evita falsos positivos con 'middleware' => [].
+        $bracketOpen = strpos($content, '[', $markerPos);
+        if ($bracketOpen === false) {
+            $this->error("  Formato inesperado en config/widgets.php.");
+            return;
+        }
+
+        $depth = 0;
+        $closePos = $bracketOpen;
+        $len = strlen($content);
+        while ($closePos < $len) {
+            if ($content[$closePos] === '[') $depth++;
+            if ($content[$closePos] === ']') {
+                if (--$depth === 0) break;
+            }
+            $closePos++;
+        }
+
+        // Avanza el cursor hasta después del ], (corchete + coma)
+        $end = $closePos + 1;
+        if ($end < $len && $content[$end] === ',') $end++;
+
+        $updated = substr($content, 0, $lineStart) . substr($content, $end);
 
         file_put_contents($path, $updated);
         $this->line("  <info>✓</info> Entrada eliminada de <comment>config/widgets.php</comment>");

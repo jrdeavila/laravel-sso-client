@@ -18,9 +18,12 @@ class MakeWidgetCommand extends Command
 
     public function handle(): int
     {
-        $name   = $this->argument('name');
-        $type   = $this->option('type');
-        $logic  = $this->option('logic');
+        $name  = $this->argument('name');
+        $logic = $this->option('logic');
+
+        // Si --logic sin --type explícito, inferir 'announcement' automáticamente.
+        $typeExplicit = $this->input->hasParameterOption('--type');
+        $type = $typeExplicit ? $this->option('type') : ($logic ? 'announcement' : 'chatbot');
 
         if (! in_array($type, self::VALID_TYPES)) {
             $this->error("Tipo inválido: '{$type}'. Valores aceptados: " . implode(', ', self::VALID_TYPES));
@@ -261,21 +264,33 @@ PHP;
         ],
 PHP;
 
-        // Inserta antes del cierre ], del array 'widgets'.
-        // El cierre tiene 4 espacios de indentación en el formato estándar publicado.
-        $updated = preg_replace(
-            "/('widgets'\s*=>\s*\[)(.*?)(\n\s{4}\],)/s",
-            '$1$2' . $entry . "\n    ],",
-            $content,
-            1
-        );
+        // Localiza el cierre del array 'widgets' buscando la primera aparición de
+        // "\n    ]," después de "'widgets' => [".
+        // Se usa strpos + substr_replace en lugar de preg_replace para evitar que
+        // el contenido del $entry (con \, $ del código PHP) sea interpretado como
+        // tokens de reemplazo por el motor de regex.
+        $widgetsStart = strpos($content, "'widgets' => [");
 
-        if ($updated === null || $updated === $content) {
-            $this->error("  No se pudo modificar config/widgets.php automáticamente.");
-            $this->line("  Agrega manualmente la siguiente entrada en el array 'widgets':");
+        if ($widgetsStart === false) {
+            $this->error("  No se encontró el array 'widgets' en config/widgets.php.");
+            $this->line("  Agrega manualmente la siguiente entrada:");
             $this->line($entry);
             return;
         }
+
+        $closeMarker = "\n    ],";
+        $closePos    = strpos($content, $closeMarker, $widgetsStart);
+
+        if ($closePos === false) {
+            $this->error("  No se encontró el cierre del array 'widgets' en config/widgets.php.");
+            $this->line("  Agrega manualmente la siguiente entrada:");
+            $this->line($entry);
+            return;
+        }
+
+        $updated = substr($content, 0, $closePos)
+            . $entry
+            . substr($content, $closePos);
 
         file_put_contents($configPath, $updated);
 
