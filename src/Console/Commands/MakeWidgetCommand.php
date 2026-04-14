@@ -9,29 +9,29 @@ class MakeWidgetCommand extends Command
 {
     protected $signature = 'make:widget
                             {name : Nombre del widget en PascalCase o kebab-case (ej: AsistenteVirtual)}
-                            {--type=chatbot : Tipo del widget: chatbot | survey | notification | announcement}
-                            {--logic : Genera clase Check para validación previa (recomendado para announcement)}';
+                            {--type=chatbot : Tipo del widget: chatbot | notification | survey | embed}
+                            {--logic : Genera clase Check para validación previa (recomendado para survey)}';
 
     protected $description = 'Crea un widget SSO: vista Blade, clase de check opcional (--logic) y entrada en config/widgets.php';
 
-    private const VALID_TYPES = ['chatbot', 'survey', 'notification', 'announcement'];
+    private const VALID_TYPES = ['chatbot', 'notification', 'survey', 'embed'];
 
     public function handle(): int
     {
         $name  = $this->argument('name');
         $logic = $this->option('logic');
 
-        // Si --logic sin --type explícito, inferir 'announcement' automáticamente.
+        // Si --logic sin --type explícito, inferir 'survey' automáticamente.
         $typeExplicit = $this->input->hasParameterOption('--type');
-        $type = $typeExplicit ? $this->option('type') : ($logic ? 'announcement' : 'chatbot');
+        $type = $typeExplicit ? $this->option('type') : ($logic ? 'survey' : 'chatbot');
 
         if (! in_array($type, self::VALID_TYPES)) {
             $this->error("Tipo inválido: '{$type}'. Valores aceptados: " . implode(', ', self::VALID_TYPES));
             return self::FAILURE;
         }
 
-        if ($logic && $type !== 'announcement') {
-            $this->warn("--logic está pensado para widgets de tipo 'announcement'. Se creará la clase de todas formas.");
+        if ($logic && $type !== 'survey') {
+            $this->warn("--logic está pensado para widgets de tipo 'survey'. Se creará la clase de todas formas.");
         }
 
         $slug      = Str::kebab(Str::studly($name));   // AsistenteVirtual → asistente-virtual
@@ -81,60 +81,47 @@ class MakeWidgetCommand extends Command
 
     private function viewStub(string $slug, string $type, string $className): string
     {
+        // ── chatbot ───────────────────────────────────────────────────────────────
         if ($type === 'chatbot') {
             return <<<BLADE
 @extends(\$widgetLayout)
 
-@push('styles')
-<style>
-    /*
-     * El lanzador posiciona este iframe en una esquina (420×640 px).
-     * pointer-events:none ya está en body (layout). Solo #ccv-widget-root captura eventos.
-     * Diseña el botón toggle y el panel dentro de este contenedor.
-     */
-    #ccv-widget-root {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        align-items: flex-end;
-        padding: 1rem;
-        box-sizing: border-box;
-    }
-</style>
-@endpush
-
 @section('widget-content')
-<div x-data="{ open: false }">
+{{--
+    El lanzador renderiza este iframe dentro de un panel deslizante.
+    El iframe ocupa todo el espacio del panel; diseña tu interfaz de chat aquí.
+    Usa window.cCVSend('widget:close') para cerrar el panel desde dentro del iframe.
+--}}
+<div x-data="{
+        messages: [{ from: 'bot', text: '¡Hola, {{ auth()->user()->name ?? 'funcionario' }}! ¿En qué puedo ayudarte?' }],
+        input: '',
+        enviar() {
+            if (!this.input.trim()) return;
+            this.messages.push({ from: 'user', text: this.input });
+            const msg = this.input; this.input = '';
+            setTimeout(() => this.messages.push({ from: 'bot', text: 'Recibí: ' + msg }), 500);
+        }
+    }"
+    style="display:flex;flex-direction:column;height:100vh;padding:.75rem;gap:.5rem;box-sizing:border-box;font-family:sans-serif;">
 
-    {{-- Panel del chat --}}
-    <div x-show="open" x-cloak
-        style="width:380px;height:460px;background:#fff;border-radius:1rem;box-shadow:0 8px 32px rgba(0,0,0,.18);margin-bottom:.75rem;display:flex;flex-direction:column;overflow:hidden;">
-
-        <div style="background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;padding:.75rem 1rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
-            <strong style="font-size:.9rem;">{{ \$widgetName }}</strong>
-            <button @click="open = false; window.cCVSend('widget:close')"
-                title="Cerrar"
-                style="background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.85rem;">
-                ✕
-            </button>
-        </div>
-
-        <div style="flex:1;padding:1rem;overflow-y:auto;font-size:.85rem;color:#475569;">
-            {{-- TODO: contenido del chatbot --}}
-            <p>Hola, <strong>{{ auth()->user()->name ?? 'funcionario' }}</strong>. ¿En qué puedo ayudarte?</p>
-        </div>
-
+    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.4rem;">
+        <template x-for="(m, i) in messages" :key="i">
+            <div :style="m.from==='user'
+                ? 'align-self:flex-end;background:#d1e8ff;padding:.4rem .75rem;border-radius:1rem 1rem .2rem 1rem;max-width:80%;font-size:.82rem;'
+                : 'align-self:flex-start;background:#f1f5f9;padding:.4rem .75rem;border-radius:1rem 1rem 1rem .2rem;max-width:80%;font-size:.82rem;'"
+                x-text="m.text"></div>
+        </template>
     </div>
 
-    {{-- Botón toggle (siempre visible en la esquina) --}}
-    <button @click="open = !open"
-        :title="open ? 'Minimizar' : '{{ \$widgetName }}'"
-        style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;cursor:pointer;font-size:1.3rem;box-shadow:0 4px 18px rgba(59,130,246,.45);transition:transform .2s;">
-        <i :class="open ? 'fas fa-chevron-down' : 'fas fa-comment-dots'"></i>
-    </button>
-
+    <div style="display:flex;gap:.4rem;">
+        <input x-model="input" @keydown.enter="enviar()" type="text"
+            placeholder="Escribe un mensaje..."
+            style="flex:1;padding:.45rem .75rem;border:1px solid #cbd5e1;border-radius:.5rem;font-size:.82rem;outline:none;">
+        <button @click="enviar()"
+            style="padding:.45rem .9rem;background:#3b82f6;color:#fff;border:none;border-radius:.5rem;cursor:pointer;font-size:.82rem;">
+            Enviar
+        </button>
+    </div>
 </div>
 @endsection
 
@@ -144,29 +131,93 @@ class MakeWidgetCommand extends Command
 BLADE;
         }
 
-        // survey / notification / announcement — ocupa pantalla completa, el lanzador pone el botón ✕
-        $closeHint = $type !== 'announcement'
-            ? '{{-- El lanzador ya provee un botón ✕ fuera del iframe. No añadas otro aquí. --}}'
-            : '{{-- Para announcements sin close externo, usa cCVSend(\'widget:submitted\') al completar. --}}';
+        // ── notification ──────────────────────────────────────────────────────────
+        if ($type === 'notification') {
+            return <<<BLADE
+@extends(\$widgetLayout)
 
+@section('widget-content')
+{{--
+    Widget de notificación: no tiene interfaz visual.
+    Este iframe se carga de forma invisible; su único propósito es enviar
+    mensajes toast al lanzador mediante window.cCVNotify().
+
+    Uso:
+        window.cCVNotify(title, message, type, duration)
+        type: 'info' | 'success' | 'warning' | 'error'
+        duration: milisegundos (0 = solo manual)
+--}}
+@endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // TODO: reemplaza con lógica real (fetch a tu API, etc.)
+    window.cCVNotify(
+        'Notificación de ejemplo',
+        'Tienes elementos pendientes de atención.',
+        'info',
+        6000
+    );
+});
+</script>
+@endpush
+BLADE;
+        }
+
+        // ── survey ────────────────────────────────────────────────────────────────
+        if ($type === 'survey') {
+            return <<<BLADE
+@extends(\$widgetLayout)
+
+@section('widget-content')
+{{--
+    Widget de encuesta: modal de ejecución única.
+    El lanzador cierra el modal permanentemente cuando recibe 'widget:submitted'.
+    El botón ✕ del lanzador (si mandatory=false) cierra sin marcar como completado;
+    la encuesta vuelve a aparecer en la próxima visita.
+    Llama window.cCVSend('widget:submitted') SOLO cuando el usuario haya respondido.
+--}}
+<div style="width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;box-sizing:border-box;background:#fff;font-family:sans-serif;">
+
+    <h2 style="font-size:1.3rem;font-weight:700;color:#1e293b;margin:0 0 .5rem;">{{ \$widgetName }}</h2>
+    <p style="color:#64748b;font-size:.88rem;text-align:center;margin:0 0 1.5rem;">
+        {{-- TODO: descripción de la encuesta para {{ auth()->user()->name ?? 'el usuario' }} --}}
+    </p>
+
+    {{-- TODO: campos de la encuesta --}}
+
+    <button onclick="window.cCVSend('widget:submitted', { source: '{{ \$widgetSlug }}' })"
+        style="padding:.6rem 1.5rem;background:#3b82f6;color:#fff;border:none;border-radius:.5rem;cursor:pointer;font-size:.9rem;">
+        Enviar respuesta
+    </button>
+
+</div>
+@endsection
+BLADE;
+        }
+
+        // ── embed (default) ───────────────────────────────────────────────────────
         return <<<BLADE
 @extends(\$widgetLayout)
 
 @section('widget-content')
-<div style="width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;box-sizing:border-box;background:#fff;font-family:sans-serif;">
+{{--
+    Widget incrustado: tarjeta flotante draggable dentro del lanzador.
+    El lanzador renderiza este iframe dentro de una tarjeta redimensionable.
+    Diseña el contenido como una vista compacta (recordatorios, tareas, etc.).
+    Usa window.cCVSend('widget:close') para cerrarlo desde dentro.
+--}}
+<div style="width:100%;height:100%;padding:1rem;box-sizing:border-box;font-family:sans-serif;overflow-y:auto;">
 
-    {$closeHint}
+    <h3 style="font-size:.9rem;font-weight:700;color:#1e293b;margin:0 0 .75rem;">{{ \$widgetName }}</h3>
 
-    <h2 style="font-size:1.4rem;font-weight:700;color:#1e293b;margin:0 0 .75rem;">{{ \$widgetName }}</h2>
-
-    <p style="color:#475569;font-size:.9rem;text-align:center;margin:0 0 1.5rem;">
-        {{-- TODO: contenido del widget para {{ auth()->user()->name ?? 'el usuario' }} --}}
-    </p>
-
-    <button onclick="window.cCVSend('widget:submitted', { source: '{{ \$widgetSlug }}' })"
-        style="padding:.6rem 1.5rem;background:#3b82f6;color:#fff;border:none;border-radius:.5rem;cursor:pointer;font-size:.9rem;">
-        Confirmar
-    </button>
+    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem;font-size:.82rem;color:#475569;">
+        {{-- TODO: lista de elementos del widget --}}
+        <li style="padding:.4rem .6rem;background:#f8fafc;border-radius:.4rem;border-left:3px solid #3b82f6;">
+            Elemento de ejemplo para {{ auth()->user()->name ?? 'el funcionario' }}
+        </li>
+    </ul>
 
 </div>
 @endsection
@@ -206,21 +257,22 @@ use Illuminate\Http\Request;
 class {$checkClass}
 {
     /**
-     * Decide si el widget '{$slug}' debe mostrarse al usuario en esta visita.
+     * Decide si la encuesta '{$slug}' debe mostrarse en esta visita.
      *
-     * El lanzador llama este endpoint server-to-server con un token SSO firmado
-     * (sub=0) antes de incluir el widget en el panel. Devuelve true para mostrar,
-     * false para omitir.
+     * El lanzador llama GET /widgets/{slug}/check?token=... server-to-server
+     * antes de incluir el widget. Retorna true = mostrar, false = omitir.
+     *
+     * El lanzador también cierra el modal permanentemente (localStorage) cuando
+     * recibe 'widget:submitted', así que este check es solo el filtro de servidor.
      *
      * El token ya fue validado por ValidateSsoToken antes de llegar aquí.
-     * Puedes leer \$request->query('token') si necesitas datos extra del payload.
      *
      * @return bool
      */
     public function __invoke(Request \$request): bool
     {
         // TODO: implementa la lógica de visibilidad.
-        // Ejemplo: return \\DB::table('anuncios')->where('activo', true)->exists();
+        // Ejemplo: return !DB::table('respuestas')->where('user_id', auth()->id())->exists();
         return true;
     }
 }

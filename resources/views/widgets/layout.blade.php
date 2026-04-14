@@ -8,24 +8,14 @@
     <link rel="stylesheet" href="{{ asset('vendor/adminlte/css/adminlte.min.css') }}">
     @stack('styles')
 </head>
-{{--
-    pointer-events:none en body: el iframe del chatbot ocupa una esquina fija de 420×640 px
-    en el lanzador para no bloquear la UI. Con pointer-events:none en el fondo, solo los
-    elementos dentro de #ccv-widget-root (que lo sobreescribe a 'all') capturan eventos.
-    Para tipos modal (survey, notification, announcement) el lanzador los muestra a pantalla
-    completa, por lo que no se requiere este truco, pero tampoco hace daño.
---}}
-<body style="margin:0; padding:0; background:transparent; overflow:hidden; pointer-events:none;">
+<body style="margin:0;padding:0;background:transparent;overflow:hidden;">
 
-<div id="ccv-widget-root" style="pointer-events:all;">
+<div id="ccv-widget-root">
     @yield('widget-content')
 </div>
 
 <script>
-    /**
-     * Configuración del widget inyectada por el servidor.
-     * Disponible globalmente como window.CCV
-     */
+    /** Configuración del widget inyectada por el servidor. */
     window.CCV = {
         widgetSlug:  '{{ $widgetSlug ?? '' }}',
         widgetType:  '{{ $widgetType ?? '' }}',
@@ -35,13 +25,13 @@
     };
 
     /**
-     * Envía un evento postMessage al lanzador (host del iframe).
+     * Envía un evento postMessage al lanzador.
      *
      * Tipos estándar:
-     *   widget:ready      → el widget terminó de cargar
-     *   widget:close      → el usuario pidió cerrar el widget
-     *   widget:submitted  → el usuario completó una acción
-     *   widget:resize     → el widget necesita cambiar de tamaño
+     *   widget:ready        → widget terminó de cargar
+     *   widget:close        → usuario cerró el widget
+     *   widget:submitted    → usuario completó la acción (survey → cierre permanente)
+     *   notification:show   → mostrar toast  { title, message, type, duration }
      */
     window.cCVSend = function(type, data = {}) {
         if (!window.CCV.launcherUrl) return;
@@ -49,6 +39,17 @@
             { source: 'ccv-widget', type, widgetSlug: window.CCV.widgetSlug, data },
             window.CCV.launcherUrl
         );
+    };
+
+    /**
+     * Shorthand para widgets tipo notification.
+     * @param {string} title    Título (puede estar vacío)
+     * @param {string} message  Cuerpo del mensaje
+     * @param {string} type     info | success | warning | error
+     * @param {number} duration ms antes de auto-cerrar (0 = solo manual)
+     */
+    window.cCVNotify = function(title, message, type = 'info', duration = 5000) {
+        window.cCVSend('notification:show', { title, message, type, duration });
     };
 
     document.addEventListener('DOMContentLoaded', function () {
