@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" style="height:100%;overflow:hidden;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $widgetName ?? 'Widget CCV' }}</title>
     <link rel="stylesheet" href="{{ asset('vendor/adminlte/css/adminlte.min.css') }}">
+    <style>
+        html, body { height: 100%; overflow: hidden; }
+        body { margin: 0; padding: 0; background: transparent; }
+        #ccv-widget-root { width: 100%; height: 100%; overflow: hidden; }
+    </style>
     @stack('styles')
 </head>
-<body style="margin:0;padding:0;background:transparent;overflow:hidden;">
+<body>
 
 <div id="ccv-widget-root">
     @yield('widget-content')
