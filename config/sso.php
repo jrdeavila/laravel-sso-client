@@ -26,4 +26,13 @@ return [
     // Evita que SsoAuthenticate se inyecte al grupo 'web', lo que causaría un
     // bucle infinito al redirigir usuarios no autenticados de vuelta a sí mismo.
     'is_launcher' => env('SSO_IS_LAUNCHER', false),
+
+    // Rutas públicas definidas por la app receptora (patrones glob).
+    // Se fusionan con las rutas configuradas en el lanzador para esta app.
+    // Ejemplos: 'api/webhooks/*', 'health', 'public/*', 'api/v1/status'
+    'public_paths' => [],
+
+    // Segundos durante los que se cachean las rutas públicas obtenidas del lanzador.
+    // Poner en 0 para deshabilitar la caché (no recomendado en producción).
+    'public_paths_cache_ttl' => env('SSO_PUBLIC_PATHS_CACHE_TTL', 300),
 ];

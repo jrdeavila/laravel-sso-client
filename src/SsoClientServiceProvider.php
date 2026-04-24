@@ -8,6 +8,7 @@ use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\SsoAuthenticate;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\ValidateSsoToken;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\WidgetSessionMiddleware;
+use CamaradeComercioDeValledupar\SsoClient\Services\PublicPathsResolver;
 use CamaradeComercioDeValledupar\SsoClient\Services\SsoTokenService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +26,8 @@ class SsoClientServiceProvider extends ServiceProvider
         $this->app->singleton(SsoTokenService::class, fn ($app) => new SsoTokenService(
             $app->make(SsoSigner::class)
         ));
+
+        $this->app->singleton(PublicPathsResolver::class);
 
         $this->registerWidgetFeature();
     }

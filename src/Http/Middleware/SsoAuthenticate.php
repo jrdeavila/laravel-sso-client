@@ -2,20 +2,18 @@
 
 namespace CamaradeComercioDeValledupar\SsoClient\Http\Middleware;
 
+use CamaradeComercioDeValledupar\SsoClient\Services\PublicPathsResolver;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SsoAuthenticate
 {
-    // Rutas accesibles sin autenticación (rutas propias del paquete SSO y widgets)
-    // Los endpoints de widgets usan sso.token (ValidateSsoToken) como seguridad.
-    private array $except = ['sso/*', 'widgets/*'];
+    public function __construct(private PublicPathsResolver $resolver) {}
 
     public function handle(Request $request, Closure $next): mixed
     {
-        // Dejar pasar rutas excluidas
-        foreach ($this->except as $pattern) {
+        foreach ($this->resolver->resolve() as $pattern) {
             if ($request->is($pattern)) {
                 return $next($request);
             }
@@ -25,7 +23,6 @@ class SsoAuthenticate
             return $next($request);
         }
 
-        // Petición AJAX / API: responder 401 sin HTML
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
