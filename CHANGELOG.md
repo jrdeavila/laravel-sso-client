@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.2.1] - 2026-04-27
+
+### Mejorado
+- `SsoAuthenticate` marca `sso_public_path=true` en `$request->attributes` para rutas públicas
+- Si un middleware `auth` de la ruta bloquea una ruta pública, se devuelve `HTTP 401` en vez de redirigir al lanzador
+- Vista `sso-client::public-path-auth-conflict` con instrucción de corrección para el desarrollador
+
+### Sin cambios (backward compatible con v1.2.0)
+- Comportamiento anterior idéntico cuando `auth` no está presente en rutas públicas
+- Todos los endpoints y middleware existentes — sin modificaciones
+
 ## [1.2.0] - 2026-04-27
 
 ### Agregado
