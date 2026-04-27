@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0] - 2026-04-27
+
+### Agregado
+- Endpoint `GET /sso/local-public-paths` registrado automáticamente por el paquete
+- El lanzador lo consulta desde Admin > Aplicativos > Ver detalle > "Cargar rutas del receptor"
+- Autenticado con service token (`sub=0`) firmado con el secret de la app receptora
+- Devuelve el array `config('sso.public_paths', [])` de la app receptora
+
+### Sin cambios (backward compatible con v1.1.x)
+- Todos los endpoints y middleware existentes — sin modificaciones
+- `config/sso.php` — `public_paths` ya existía desde v1.1.x
+
 ## [1.1.0] - 2026-04-07
 
 ### Agregado
