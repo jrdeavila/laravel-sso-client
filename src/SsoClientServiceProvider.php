@@ -5,6 +5,7 @@ namespace CamaradeComercioDeValledupar\SsoClient;
 use CamaradeComercioDeValledupar\SsoClient\Console\Commands\DeleteWidgetCommand;
 use CamaradeComercioDeValledupar\SsoClient\Console\Commands\MakeWidgetCommand;
 use CamaradeComercioDeValledupar\SsoClient\Crypto\SsoSigner;
+use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\ApplySsoAppConfig;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\SsoAuthenticate;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\ValidateSsoToken;
 use CamaradeComercioDeValledupar\SsoClient\Http\Middleware\WidgetSessionMiddleware;
@@ -41,6 +42,7 @@ class SsoClientServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('sso.token', ValidateSsoToken::class);
         $this->app['router']->aliasMiddleware('sso.auth', SsoAuthenticate::class);
         $this->app['router']->aliasMiddleware('sso.widget_session', WidgetSessionMiddleware::class);
+        $this->app['router']->aliasMiddleware('sso.app_config', ApplySsoAppConfig::class);
 
         // Inyectar SsoAuthenticate en el grupo 'web' SOLO en apps receptoras.
         // Si is_launcher=true el paquete está instalado en el propio lanzador:

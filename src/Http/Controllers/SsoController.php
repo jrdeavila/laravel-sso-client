@@ -34,7 +34,17 @@ class SsoController extends Controller
             return redirect(config('sso.launcher_url') . '?error=sso_user_not_found');
         }
 
-        // 3. Login y redirect
+        // 3. Persistir metadatos del app en sesión para que las vistas puedan
+        //    mostrar logo, nombre y colores configurados en el lanzador.
+        session([config('sso.app_meta_session_key', 'sso_app') => [
+            'name'  => $payload->name  ?? null,
+            'logo'  => $payload->logo  ?? null,
+            'color' => $payload->color ?? null,
+            'icon'  => $payload->icon  ?? null,
+            'slug'  => $payload->app   ?? null,
+        ]]);
+
+        // 4. Login y redirect
         Auth::login($user);
 
         return redirect(config('sso.redirect_after_login'));

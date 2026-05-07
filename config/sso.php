@@ -27,6 +27,10 @@ return [
     // bucle infinito al redirigir usuarios no autenticados de vuelta a sí mismo.
     'is_launcher' => env('SSO_IS_LAUNCHER', false),
 
+    // Clave de sesión donde se guardan los metadatos del app enviados por el lanzador
+    // (name, logo, color, icon, slug). Usada por ApplySsoAppConfig (alias: sso.app_config).
+    'app_meta_session_key' => env('SSO_APP_META_KEY', 'sso_app'),
+
     // Rutas públicas definidas por la app receptora (patrones glob).
     // Se fusionan con las rutas configuradas en el lanzador para esta app.
     // Ejemplos: 'api/webhooks/*', 'health', 'public/*', 'api/v1/status'
