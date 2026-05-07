@@ -43,20 +43,27 @@
             // Enviar notificación por localStorage (cross-tab más fiable)
             try { localStorage.setItem('sso_notification', notification); } catch (e) {}
 
-            // Buscar la pestaña del lanzador
-            var launcherWin = null;
+            // Intenta enfocar el lanzador y cerrar esta pestaña.
+            // setTimeout es el fallback por si window.close() falla silenciosamente.
+            function goToLauncher(launcherWin, extra) {
+                if (extra) { try { extra(); } catch (e) {} }
+                if (launcherWin) { try { launcherWin.focus(); } catch (e) {} }
+                window.close();
+                setTimeout(function () { window.location.href = launcherUrl + '?error=sso_unauthorized'; }, 500);
+            }
 
             // Método 1: window.opener
             if (window.opener && !window.opener.closed) {
                 try {
-                    window.opener.postMessage({ type: 'sso_access_denied', app: appName }, '*');
-                    window.opener.focus();
-                    window.close();
+                    goToLauncher(window.opener, function () {
+                        window.opener.postMessage({ type: 'sso_access_denied', app: appName }, '*');
+                    });
                     return;
                 } catch (e) { /* cross-origin — continuar */ }
             }
 
             // Método 2: pestaña con window.name = 'sso-launcher'
+            var launcherWin = null;
             try { launcherWin = window.open('', 'sso-launcher'); } catch (e) {}
 
             if (launcherWin && launcherWin !== window && !launcherWin.closed) {
@@ -65,19 +72,17 @@
                 catch (e) { launcherOpen = true; }
 
                 if (launcherOpen) {
-                    try { launcherWin.postMessage({ type: 'sso_access_denied', app: appName }, '*'); } catch (e) {}
-                    launcherWin.focus();
-                    window.close();
+                    goToLauncher(launcherWin, function () {
+                        launcherWin.postMessage({ type: 'sso_access_denied', app: appName }, '*');
+                    });
                     return;
                 } else {
                     launcherWin.close();
                 }
             }
 
-            // Sin lanzador abierto: redirigir en la misma pestaña
-            setTimeout(function () {
-                window.location.href = launcherUrl + '?error=sso_unauthorized';
-            }, 1500);
+            // Sin lanzador abierto: redirigir en esta misma pestaña
+            window.location.href = launcherUrl + '?error=sso_unauthorized';
         })();
     </script>
 </body>

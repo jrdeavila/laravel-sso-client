@@ -30,11 +30,19 @@
         (function () {
             var launcherUrl = @json($launcher_url);
 
+            // Intenta enfocar el lanzador y cerrar esta pestaña.
+            // Si window.close() falla silenciosamente (pestaña no abierta por JS),
+            // el setTimeout redirige en esta misma pestaña como fallback.
+            function goToLauncher(launcherWin) {
+                if (launcherWin) { try { launcherWin.focus(); } catch (e) {} }
+                window.close();
+                setTimeout(function () { window.location.href = launcherUrl; }, 500);
+            }
+
             // Método 1: window.opener (pestaña abierta directamente desde el launcher)
             if (window.opener && !window.opener.closed) {
                 try {
-                    window.opener.focus();
-                    window.close();
+                    goToLauncher(window.opener);
                     return;
                 } catch (e) {
                     // Error cross-origin — continuar con método 2
@@ -56,8 +64,7 @@
                 }
 
                 if (launcherIsOpen) {
-                    launcherWin.focus();
-                    window.close();
+                    goToLauncher(launcherWin);
                     return;
                 } else {
                     launcherWin.close();
